@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FlightRadarCore.Model
+namespace FlightHistoryCore.Model
 {
     public class Destination
     {

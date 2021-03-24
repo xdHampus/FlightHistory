@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FlightRadarCore\FlightRadarCore.csproj" />
+    <ProjectReference Include="..\FlightHistoryCore\FlightHistoryCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

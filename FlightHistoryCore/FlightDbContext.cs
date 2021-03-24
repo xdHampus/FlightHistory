@@ -1,7 +1,7 @@
-﻿using FlightRadarCore.Model;
+﻿using FlightHistoryCore.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace FlightRadarCore
+namespace FlightHistoryCore
 {
     public class FlightDbContext : DbContext
     {

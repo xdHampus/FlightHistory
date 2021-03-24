@@ -2,11 +2,11 @@
 //
 // To parse this JSON data, add NuGet 'Newtonsoft.Json' then do:
 //
-//    using FlightRaderScrape.Json;
+//    using FlightHistoryScraper.Json;
 //
 //    var radarArea = RadarArea.FromJson(jsonString);
 
-namespace FlightRaderScrape.Json
+namespace FlightHistoryScraper.Json
 {
     using System;
     using System.Collections.Generic;
@@ -70,7 +70,7 @@ namespace FlightRaderScrape.Json
 
     public class RadarArea
     {
-        public static Dictionary<string, RadarAreaValue> FromJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, RadarAreaValue>>(json, FlightRaderScrape.Json.ConverterBase.SettingsRadar);
+        public static Dictionary<string, RadarAreaValue> FromJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, RadarAreaValue>>(json, FlightHistoryScraper.Json.ConverterBase.SettingsRadar);
     }
 
 

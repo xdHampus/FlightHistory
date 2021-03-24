@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FlightRadarCore.Model
+namespace FlightHistoryCore.Model
 {
     public class Flight
     {

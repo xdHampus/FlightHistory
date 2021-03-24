@@ -1,4 +1,4 @@
-﻿namespace FlightRadarCore.Model
+﻿namespace FlightHistoryCore.Model
 {
     public class TimeZone
     {

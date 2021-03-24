@@ -1,5 +1,5 @@
-﻿using FlightRadarCore;
-using FlightRadarCore.Model;
+﻿using FlightHistoryCore;
+using FlightHistoryCore.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FlightRaderScrape
+namespace FlightHistoryScraper
 {
     class Program
     {

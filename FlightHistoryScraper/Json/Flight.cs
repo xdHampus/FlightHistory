@@ -2,18 +2,18 @@
 //
 // To parse this JSON data, add NuGet 'Newtonsoft.Json' then do:
 //
-//    using FlightRaderScrape.Json;
+//    using FlightHistoryScraper.Json;
 //
 //    var flight = Flight.FromJson(jsonString);
 
-namespace FlightRaderScrape.Json
+namespace FlightHistoryScraper.Json
 {
     using System;
     using System.Collections.Generic;
 
     using System.Globalization;
     using Newtonsoft.Json;
-    using DbModel = FlightRadarCore.Model;
+    using DbModel = FlightHistoryCore.Model;
     using Newtonsoft.Json.Converters;
     using System.Linq;
 
@@ -492,7 +492,7 @@ namespace FlightRaderScrape.Json
 
     public partial class Flight
     {
-        public static Flight FromJson(string json) => JsonConvert.DeserializeObject<Flight>(json, FlightRaderScrape.Json.ConverterBase.Settings);
+        public static Flight FromJson(string json) => JsonConvert.DeserializeObject<Flight>(json, FlightHistoryScraper.Json.ConverterBase.Settings);
 
         public static DbModel.Flight ToModel(Flight flight)
         {

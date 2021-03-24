@@ -2,7 +2,7 @@
 //
 // To parse this JSON data, add NuGet 'Newtonsoft.Json' then do:
 //
-//    using FlightRaderScrape.Json;
+//    using FlightHistoryScraper.Json;
 //
 //    var radarArea = RadarArea.FromJson(jsonString);
 
@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Globalization;
 
-namespace FlightRaderScrape.Json
+namespace FlightHistoryScraper.Json
 {
     internal static class ConverterBase
     {

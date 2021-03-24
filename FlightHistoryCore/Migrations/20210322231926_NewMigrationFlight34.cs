@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace FlightRadarCore.Migrations
+namespace FlightHistoryCore.Migrations
 {
     public partial class NewMigrationFlight34 : Migration
     {
