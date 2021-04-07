@@ -56,7 +56,6 @@ namespace FlightHistoryScraper.Json
         public List<string> Availability { get; set; }
 
 
-
         [JsonProperty("time", NullValueHandling = NullValueHandling.Ignore)]
         public FlightTime Time { get; set; }
 
@@ -69,6 +68,31 @@ namespace FlightHistoryScraper.Json
         [JsonProperty("s", NullValueHandling = NullValueHandling.Ignore)]
         public string S { get; set; }
 
+        public DbModel.Flight Convert()
+        {
+            var flight = new DbModel.Flight();
+
+            if(Identification != null)
+                flight.Identification = Identification.Convert();
+            if(Status != null)
+                flight.Status = Status.Convert();
+            if (Aircraft != null)
+                flight.Aircraft = Aircraft.Convert();
+            if (Airline != null)
+                flight.Airline = Airline.Convert();
+            if (Airport != null)
+                flight.Airport = Airport.Convert();
+            if (Time != null)
+                flight.Time = Time.Convert();
+            if (Trail != null)
+                flight.Trails = Trail.ConvertAll<DbModel.Trail>(t => t.Convert());
+            if (FirstTimestamp != null)
+                flight.FirstTimestamp = FirstTimestamp;
+
+            return flight;
+            
+             
+        }
 
     }
 
@@ -94,7 +118,28 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("images", NullValueHandling = NullValueHandling.Ignore)]
         public Images Images { get; set; }
+
+    internal FlightHistoryCore.Model.Aircraft Convert()
+    {
+
+            string modelCode = "", modelText = "";
+
+            if(Model != null)
+            {
+                modelCode = Model.Code;
+                modelText = Model.Text;
+            }
+
+
+            return new DbModel.Aircraft()
+            {
+                CountryId = this.CountryId,
+                Registration = this.Registration,
+                ModelCode = modelCode,
+                ModelText = modelText
+            };
     }
+}
 
     public partial class Images
     {
@@ -148,7 +193,30 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         public string Url { get; set; }
+
+    internal FlightHistoryCore.Model.Airline Convert()
+    {
+
+            string iata = "";
+            string icao = "";
+
+            if (Code != null)
+            {
+                iata = Code.Iata;
+                icao = Code.Icao;
+            }
+
+            return new DbModel.Airline()
+            {
+                Name = this.Name,
+                Short = this.Short,
+                DestinationIata = iata,
+                DestinationIcao = icao,
+                Url = this.Url,
+                
+            };
     }
+}
 
     public partial class Code
     {
@@ -169,6 +237,34 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("real")]
         public object Real { get; set; }
+
+    internal FlightHistoryCore.Model.RouteDestination Convert()
+    {
+            DbModel.Destination origin = null;
+            DbModel.Destination destination = null;
+            DbModel.Estimate real = null;
+
+            if (Origin != null)
+            {
+                origin = Origin.Convert();
+            }
+            if (Destination != null)
+            {
+                destination = Destination.Convert();
+            }
+            if(Real != null && Real is Estimated)
+            {
+                real = ((Estimated)Real).Convert();
+            }
+
+            return new DbModel.RouteDestination()
+            {
+                Origin = origin,
+                Destination = destination,
+                Real = real
+            };
+
+        }
     }
 
     public partial class PurpleDestination
@@ -193,6 +289,39 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("info", NullValueHandling = NullValueHandling.Ignore)]
         public Info Info { get; set; }
+
+        internal DbModel.Destination Convert()
+        {
+
+
+            string iata = "";
+            string icao = "";
+            DbModel.Position position = null;
+
+
+            if (Code != null)
+            {
+                iata = Code.Iata;
+                icao = Code.Icao;
+            }
+            if(Position != null)
+            {
+                position = Position.Convert();
+            }
+
+
+            return new DbModel.Destination()
+            {
+                Name = this.Name,
+                Visible = this.Visible,
+                DestinationIata = iata,
+                DestinationIcao = icao,
+                Position = position
+
+            };
+
+
+        }
     }
 
     public partial class Info
@@ -223,6 +352,34 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("region", NullValueHandling = NullValueHandling.Ignore)]
         public Region Region { get; set; }
+
+        internal DbModel.Position Convert()
+        {
+            string countryId = "", countryName = "", countryCode = "", city = "";
+
+            if(Country != null)
+            {
+                if(Country.Id.HasValue)
+                    countryId = Country.Id.ToString();
+                countryName = Country.Name;
+                countryCode = Country.Code;
+            }
+            if(Region != null)
+            {
+                city = Region.City;
+            }
+
+            return new DbModel.Position()
+            {
+                Latitude = this.Latitude,
+                Longitude = this.Longitude,
+                Altitude = this.Altitude,
+                CountryName = countryName,
+                CountryId = countryId,
+                CountryCode = countryCode,
+                City = city
+            };
+        }
     }
 
     public partial class Country
@@ -271,7 +428,8 @@ namespace FlightHistoryScraper.Json
     {
         [JsonProperty("aircraft")]
         public List<AircraftElement> Aircraft { get; set; }
-    }
+
+}
 
     public partial class AircraftElement
     {
@@ -283,6 +441,7 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("time", NullValueHandling = NullValueHandling.Ignore)]
         public AircraftTime Time { get; set; }
+
     }
 
     public partial class AircraftAirport
@@ -359,7 +518,31 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("callsign", NullValueHandling = NullValueHandling.Ignore)]
         public string Callsign { get; set; }
+
+    internal FlightHistoryCore.Model.FlightIdentification Convert()
+    {
+            string nAlternative = "";
+            string nDefault = "";
+
+            if (Number != null)
+            {
+                if(Number.Alternative != null)
+                    nAlternative = Number.Alternative.ToString();
+                if (Number.Default != null)
+                    nDefault = Number.Default.ToString();
+            }
+
+            return new DbModel.FlightIdentification()
+            {
+                Row = this.Row,
+                NumberAlternative = nAlternative,
+                NumberDefault = nDefault,
+                Callsign = this.Callsign,
+                FlightIdentifier = this.Id
+
+            };
     }
+}
 
     public partial class FluffyNumber
     {
@@ -389,7 +572,24 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("generic", NullValueHandling = NullValueHandling.Ignore)]
         public Generic Generic { get; set; }
+
+    internal FlightHistoryCore.Model.FlightStatus Convert()
+    {
+
+            DbModel.Estimate estimate = null;
+
+            if (Estimated != null && Estimated is FlightHistoryScraper.Json.Estimated)
+            {
+                estimate = ((Json.Estimated)Estimated).Convert();
+            }
+
+            return new DbModel.FlightStatus()
+            {
+                Live = this.Live,
+                Estimate = estimate
+            };
     }
+}
 
     public partial class Generic
     {
@@ -437,7 +637,45 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("historical")]
         public Historical Historical { get; set; }
+
+    internal FlightHistoryCore.Model.FlightTime Convert()
+    {
+
+            DbModel.Estimate scheduled = null;
+            DbModel.Estimate real = null;
+            DbModel.Estimate estimated = null;
+            long? eta = 0;
+            long? updated = 0;
+
+
+            if (Scheduled != null)
+            {
+                scheduled = Scheduled.Convert();
+            }
+            if (Real != null)
+            {
+                real = Real.Convert();
+            }
+            if (Estimated != null)
+            {
+                estimated = Estimated.Convert();
+            }
+            if (Other != null)
+            {
+                eta = Other.Eta;
+                updated = Other.Updated;
+            }
+
+            return new DbModel.FlightTime()
+            {
+                Scheduled = scheduled,
+                Real = real,
+                Estimated = estimated,
+                Eta = eta,
+                Updated = updated
+            };
     }
+}
 
     public partial class Estimated
     {
@@ -446,6 +684,18 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("arrival")]
         public long? Arrival { get; set; }
+
+        internal DbModel.Estimate Convert()
+        {
+
+            return new DbModel.Estimate()
+            {
+                Departure = this.Departure,
+                Arrival = this.Arrival
+
+            };
+
+        }
     }
 
     public partial class Historical
@@ -487,6 +737,19 @@ namespace FlightHistoryScraper.Json
 
         [JsonProperty("hd", NullValueHandling = NullValueHandling.Ignore)]
         public long? Hd { get; set; }
+
+        internal DbModel.Trail Convert()
+        {
+            return new DbModel.Trail()
+            {
+                Lat = this.Lat,
+                Lng = this.Lng,
+                Alt = this.Alt,
+                Spd = this.Spd,
+                Ts = this.Ts,
+                Hd = this.Hd
+            };
+        }
     }
 
 
@@ -494,160 +757,7 @@ namespace FlightHistoryScraper.Json
     {
         public static Flight FromJson(string json) => JsonConvert.DeserializeObject<Flight>(json, FlightHistoryScraper.Json.ConverterBase.Settings);
 
-        public static DbModel.Flight ToModel(Flight flight)
-        {
 
-
-            var dbFlight = new DbModel.Flight()
-            {
-                Level = flight.Level,
-                Promote = flight.Promote,
-                FlightHistory = ParseFlightHistory(flight),
-                Trails = ParseTrails(flight),
-                FirstTimestamp = flight.FirstTimestamp,
-                S = flight.S
-
-                
-            };
-
-            if (flight.Identification != null)
-            {
-                dbFlight.Identification = new DbModel.FlightIdentification()
-                {
-                    Callsign = flight.Identification.Callsign,
-                    FlightIdentifier = flight.Identification.Id,
-                    Row = flight.Identification.Row,
-                };
-            }
-            if (flight.Status != null)
-            {
-                dbFlight.Status = new DbModel.FlightStatus()
-                {
-                    Live = flight.Status.Live,
-                    Text = flight.Status.Text,
-                    Icon = flight.Status.Icon,
-                    Ambiguous = flight.Status.Ambiguous,
-                };
-            }
-            if (flight.Aircraft != null)
-            {
-                dbFlight.Aircraft = new DbModel.Aircraft()
-                {
-                    CountryId = flight.Aircraft.CountryId,
-                    Registration = flight.Aircraft.Registration,
-                    Hex = flight.Aircraft.Hex,
-                };
-            }
-            if (flight.Airline != null)
-            {
-                dbFlight.Airline = new DbModel.Airline()
-                {
-                    Name = flight.Airline.Name,
-                    Short = flight.Airline.Short,
-                    Url = flight.Airline.Url
-                };
-            }
-            if (flight.Time != null
-                && flight.Time.Scheduled != null
-                && flight.Time.Real != null
-                && flight.Time.Estimated != null)
-            {
-                dbFlight.Time = new DbModel.FlightTime()
-                {
-                    Scheduled = new DbModel.Estimate()
-                    {
-                        Departure = flight.Time.Scheduled.Departure,
-                        Arrival = flight.Time.Scheduled.Arrival
-                    },
-                    Real = new DbModel.Estimate()
-                    {
-                        Departure = flight.Time.Real.Departure,
-                        Arrival = flight.Time.Real.Arrival
-                    },
-                    Estimated = new DbModel.Estimate()
-                    {
-                        Departure = flight.Time.Estimated.Departure,
-                        Arrival = flight.Time.Estimated.Arrival
-                    },
-                };
-            }
-
-
-
-
-            return dbFlight;
-        }
-
-        public static List<DbModel.Trail> ParseTrails(Flight flight)
-        {
-
-            var result = new List<DbModel.Trail>();
-
-            if (flight.Trail != null)
-            {
-                result = ParseTrails(flight.Trail);
-            }
-
-
-
-            return result;
-        }
-
-        public static List<DbModel.Trail> ParseTrails(List<Trail> trails)
-        {
-
-
-            var result = new List<DbModel.Trail>();
-
-            if (trails != null)
-            {
-                foreach (var item in trails)
-                {
-                    result.Add(new DbModel.Trail()
-                    {
-                        Lat = item.Lat,
-                        Lng = item.Lng,
-                        Alt = item.Alt,
-                        Spd = item.Spd,
-                        Ts = item.Ts,
-                        Hd = item.Hd
-                    });
-
-                }
-            }
-
-
-
-            return result;
-
-
-        }
-
-
-        private static List<DbModel.AircraftElement> ParseFlightHistory(Flight flight)
-        {
-            var result = new List<DbModel.AircraftElement>();
-
-            if(flight.FlightHistory != null && flight.FlightHistory.Aircraft != null)
-            {
-                foreach (var item in flight.FlightHistory.Aircraft)
-                {
-
-                    result.Add(new DbModel.AircraftElement()
-                    {
-                        Identification = new DbModel.AircraftIdentification()
-                        {
-                            AircraftIdentifier = item.Identification.Id,
-                            PurplerNumber = item.Identification.Number.Default
-                        },
-                        Departure = item.Time.Real.Departure
-                    });
-
-                }
-            }
-
-            return result;
-        }
     }
 
 

@@ -2,7 +2,7 @@
 
 namespace FlightHistoryCore.Migrations
 {
-    public partial class NewMigrationFlight34 : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,28 +15,11 @@ namespace FlightHistoryCore.Migrations
                     ModelCode = table.Column<string>(type: "TEXT", nullable: true),
                     ModelText = table.Column<string>(type: "TEXT", nullable: true),
                     CountryId = table.Column<long>(type: "INTEGER", nullable: true),
-                    Registration = table.Column<string>(type: "TEXT", nullable: true),
-                    Hex = table.Column<string>(type: "TEXT", nullable: true),
-                    Age = table.Column<string>(type: "TEXT", nullable: true),
-                    Msn = table.Column<string>(type: "TEXT", nullable: true)
+                    Registration = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Aircraft", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AircraftIdentifications",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    AircraftIdentifier = table.Column<string>(type: "TEXT", nullable: true),
-                    PurplerNumber = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AircraftIdentifications", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -107,39 +90,13 @@ namespace FlightHistoryCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TimeZones",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Offset = table.Column<long>(type: "INTEGER", nullable: true),
-                    OffsetHours = table.Column<string>(type: "TEXT", nullable: true),
-                    Abbr = table.Column<string>(type: "TEXT", nullable: true),
-                    AbbrName = table.Column<string>(type: "TEXT", nullable: true),
-                    IsDst = table.Column<bool>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TimeZones", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "FlightStatuses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Live = table.Column<bool>(type: "INTEGER", nullable: true),
-                    Text = table.Column<string>(type: "TEXT", nullable: true),
-                    Icon = table.Column<string>(type: "TEXT", nullable: true),
-                    EstimateId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Ambiguous = table.Column<bool>(type: "INTEGER", nullable: true),
-                    GenericStatusText = table.Column<string>(type: "TEXT", nullable: true),
-                    GenericStatusColor = table.Column<string>(type: "TEXT", nullable: true),
-                    GenericStatusType = table.Column<string>(type: "TEXT", nullable: true),
-                    GenericEventcUtc = table.Column<long>(type: "INTEGER", nullable: true),
-                    GenericEventLocal = table.Column<long>(type: "INTEGER", nullable: true)
+                    EstimateId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -162,9 +119,7 @@ namespace FlightHistoryCore.Migrations
                     RealId = table.Column<int>(type: "INTEGER", nullable: true),
                     EstimatedId = table.Column<int>(type: "INTEGER", nullable: true),
                     Eta = table.Column<long>(type: "INTEGER", nullable: true),
-                    Updated = table.Column<long>(type: "INTEGER", nullable: true),
-                    HistoricalFlighttime = table.Column<long>(type: "INTEGER", nullable: true),
-                    HistoricalDelay = table.Column<long>(type: "INTEGER", nullable: true)
+                    Updated = table.Column<long>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -199,12 +154,7 @@ namespace FlightHistoryCore.Migrations
                     DestinationIata = table.Column<string>(type: "TEXT", nullable: true),
                     DestinationIcao = table.Column<string>(type: "TEXT", nullable: true),
                     PositionId = table.Column<int>(type: "INTEGER", nullable: true),
-                    TimezoneId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Visible = table.Column<bool>(type: "INTEGER", nullable: true),
-                    Website = table.Column<string>(type: "TEXT", nullable: true),
-                    Terminal = table.Column<long>(type: "INTEGER", nullable: true),
-                    Baggage = table.Column<string>(type: "TEXT", nullable: true),
-                    Gate = table.Column<string>(type: "TEXT", nullable: true)
+                    Visible = table.Column<bool>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -213,12 +163,6 @@ namespace FlightHistoryCore.Migrations
                         name: "FK_Destinations_Positions_PositionId",
                         column: x => x.PositionId,
                         principalTable: "Positions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Destinations_TimeZones_TimezoneId",
-                        column: x => x.TimezoneId,
-                        principalTable: "TimeZones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -265,18 +209,11 @@ namespace FlightHistoryCore.Migrations
                     ScanCompleted = table.Column<bool>(type: "INTEGER", nullable: true),
                     IdentificationId = table.Column<int>(type: "INTEGER", nullable: true),
                     StatusId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Level = table.Column<string>(type: "TEXT", nullable: true),
-                    Promote = table.Column<bool>(type: "INTEGER", nullable: true),
                     AircraftId = table.Column<int>(type: "INTEGER", nullable: true),
                     AirlineId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Owner = table.Column<string>(type: "TEXT", nullable: true),
-                    Airspace = table.Column<string>(type: "TEXT", nullable: true),
                     AirportId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Ems = table.Column<string>(type: "TEXT", nullable: true),
-                    Availability = table.Column<string>(type: "TEXT", nullable: true),
                     TimeId = table.Column<int>(type: "INTEGER", nullable: true),
-                    FirstTimestamp = table.Column<long>(type: "INTEGER", nullable: true),
-                    S = table.Column<string>(type: "TEXT", nullable: true)
+                    FirstTimestamp = table.Column<long>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -320,40 +257,6 @@ namespace FlightHistoryCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AircraftElements",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    IdentificationId = table.Column<int>(type: "INTEGER", nullable: true),
-                    AirportId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Departure = table.Column<long>(type: "INTEGER", nullable: true),
-                    FlightId = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AircraftElements", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AircraftElements_AircraftIdentifications_IdentificationId",
-                        column: x => x.IdentificationId,
-                        principalTable: "AircraftIdentifications",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AircraftElements_Flights_FlightId",
-                        column: x => x.FlightId,
-                        principalTable: "Flights",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AircraftElements_RouteDestinations_AirportId",
-                        column: x => x.AirportId,
-                        principalTable: "RouteDestinations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Trails",
                 columns: table => new
                 {
@@ -379,29 +282,9 @@ namespace FlightHistoryCore.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AircraftElements_AirportId",
-                table: "AircraftElements",
-                column: "AirportId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AircraftElements_FlightId",
-                table: "AircraftElements",
-                column: "FlightId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AircraftElements_IdentificationId",
-                table: "AircraftElements",
-                column: "IdentificationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Destinations_PositionId",
                 table: "Destinations",
                 column: "PositionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Destinations_TimezoneId",
-                table: "Destinations",
-                column: "TimezoneId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Flights_AircraftId",
@@ -477,13 +360,7 @@ namespace FlightHistoryCore.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AircraftElements");
-
-            migrationBuilder.DropTable(
                 name: "Trails");
-
-            migrationBuilder.DropTable(
-                name: "AircraftIdentifications");
 
             migrationBuilder.DropTable(
                 name: "Flights");
@@ -514,9 +391,6 @@ namespace FlightHistoryCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "Positions");
-
-            migrationBuilder.DropTable(
-                name: "TimeZones");
         }
     }
 }

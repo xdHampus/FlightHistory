@@ -9,8 +9,6 @@
         public Estimate Estimated { get; set; }
         public long? Eta { get; set; }
         public long? Updated { get; set; }
-        public long? HistoricalFlighttime { get; set; }
-        public long? HistoricalDelay { get; set; }
 
     }
 

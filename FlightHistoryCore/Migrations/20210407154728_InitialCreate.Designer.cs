@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlightHistoryCore.Migrations
 {
     [DbContext(typeof(FlightDbContext))]
-    [Migration("20210322231926_NewMigrationFlight34")]
-    partial class NewMigrationFlight34
+    [Migration("20210407154728_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,22 +24,13 @@ namespace FlightHistoryCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Age")
-                        .HasColumnType("TEXT");
-
                     b.Property<long?>("CountryId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Hex")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("ModelCode")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ModelText")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Msn")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Registration")
@@ -48,52 +39,6 @@ namespace FlightHistoryCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Aircraft");
-                });
-
-            modelBuilder.Entity("FlightHistoryCore.Model.AircraftElement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("AirportId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("Departure")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("FlightId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("IdentificationId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AirportId");
-
-                    b.HasIndex("FlightId");
-
-                    b.HasIndex("IdentificationId");
-
-                    b.ToTable("AircraftElements");
-                });
-
-            modelBuilder.Entity("FlightHistoryCore.Model.AircraftIdentification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AircraftIdentifier")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PurplerNumber")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AircraftIdentifications");
                 });
 
             modelBuilder.Entity("FlightHistoryCore.Model.Airline", b =>
@@ -128,16 +73,10 @@ namespace FlightHistoryCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Baggage")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("DestinationIata")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DestinationIcao")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Gate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -146,23 +85,12 @@ namespace FlightHistoryCore.Migrations
                     b.Property<int?>("PositionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("Terminal")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("TimezoneId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool?>("Visible")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Website")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PositionId");
-
-                    b.HasIndex("TimezoneId");
 
                     b.ToTable("Destinations");
                 });
@@ -199,32 +127,11 @@ namespace FlightHistoryCore.Migrations
                     b.Property<int?>("AirportId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Airspace")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Availability")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Ems")
-                        .HasColumnType("TEXT");
-
                     b.Property<long?>("FirstTimestamp")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("IdentificationId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Level")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Owner")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool?>("Promote")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("S")
-                        .HasColumnType("TEXT");
 
                     b.Property<bool?>("ScanCompleted")
                         .HasColumnType("INTEGER");
@@ -284,35 +191,11 @@ namespace FlightHistoryCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool?>("Ambiguous")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("EstimateId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("GenericEventLocal")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("GenericEventcUtc")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("GenericStatusColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GenericStatusText")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GenericStatusType")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Icon")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool?>("Live")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -331,12 +214,6 @@ namespace FlightHistoryCore.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<long?>("Eta")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("HistoricalDelay")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("HistoricalFlighttime")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("RealId")
@@ -417,35 +294,6 @@ namespace FlightHistoryCore.Migrations
                     b.ToTable("RouteDestinations");
                 });
 
-            modelBuilder.Entity("FlightHistoryCore.Model.TimeZone", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Abbr")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AbbrName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool?>("IsDst")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("Offset")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("OffsetHours")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TimeZones");
-                });
-
             modelBuilder.Entity("FlightHistoryCore.Model.Trail", b =>
                 {
                     b.Property<int>("Id")
@@ -480,38 +328,13 @@ namespace FlightHistoryCore.Migrations
                     b.ToTable("Trails");
                 });
 
-            modelBuilder.Entity("FlightHistoryCore.Model.AircraftElement", b =>
-                {
-                    b.HasOne("FlightHistoryCore.Model.RouteDestination", "Airport")
-                        .WithMany()
-                        .HasForeignKey("AirportId");
-
-                    b.HasOne("FlightHistoryCore.Model.Flight", null)
-                        .WithMany("FlightHistory")
-                        .HasForeignKey("FlightId");
-
-                    b.HasOne("FlightHistoryCore.Model.AircraftIdentification", "Identification")
-                        .WithMany()
-                        .HasForeignKey("IdentificationId");
-
-                    b.Navigation("Airport");
-
-                    b.Navigation("Identification");
-                });
-
             modelBuilder.Entity("FlightHistoryCore.Model.Destination", b =>
                 {
                     b.HasOne("FlightHistoryCore.Model.Position", "Position")
                         .WithMany()
                         .HasForeignKey("PositionId");
 
-                    b.HasOne("FlightHistoryCore.Model.TimeZone", "Timezone")
-                        .WithMany()
-                        .HasForeignKey("TimezoneId");
-
                     b.Navigation("Position");
-
-                    b.Navigation("Timezone");
                 });
 
             modelBuilder.Entity("FlightHistoryCore.Model.Flight", b =>
@@ -617,8 +440,6 @@ namespace FlightHistoryCore.Migrations
 
             modelBuilder.Entity("FlightHistoryCore.Model.Flight", b =>
                 {
-                    b.Navigation("FlightHistory");
-
                     b.Navigation("Trails");
                 });
 #pragma warning restore 612, 618

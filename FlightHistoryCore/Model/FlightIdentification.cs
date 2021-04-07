@@ -11,9 +11,4 @@
         public string Callsign { get; set; }
     }
 
-
-
-
-
-
 }

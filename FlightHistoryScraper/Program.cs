@@ -13,10 +13,7 @@ namespace FlightHistoryScraper
     class Program
     {
 
-        private const int rateDelay = 1000;
-        private const string radarAreaUrl = "https://data-live.flightradar24.com/zones/fcgi/feed.js?faa=1&satellite=1&mlat=1&flarm=1&adsb=1&gnd=1&air=1&vehicles=1&estimated=1&maxage=14400&gliders=1&stats=1";
-        private const string flightUrl = "https://data-live.flightradar24.com/clickhandler/?version=1.5";
-
+  
         private const int areaScanDelayHours = 0;
         private const int areaScanDelayMinutes = 30;
         private const int areaScanDelaySeconds = 0;
@@ -56,7 +53,7 @@ namespace FlightHistoryScraper
                                                                                                      areaScanDelayMinutes,
                                                                                                      areaScanDelaySeconds).TotalSeconds)
                         .ToString();
-                    var timeSpanNext = new TimeSpan(areaScanDelayHours,    areaScanDelayMinutes, areaScanDelaySeconds) - new TimeSpan(0, 0, int.Parse(nextScan));
+                    var timeSpanNext = new TimeSpan(areaScanDelayHours, areaScanDelayMinutes, areaScanDelaySeconds) - new TimeSpan(0, 0, int.Parse(nextScan));
 
                     Console.WriteLine("");
                     Console.WriteLine("");
@@ -108,14 +105,16 @@ namespace FlightHistoryScraper
 
                     if (itemInDb != null)
                     {
-                        var res = GetFlight(flightId);
+                        var res = await GetFlight(flightId);
 
-                        if (res.Trail != null && res.Trail.Count > itemInDb.Trails.Count)
+                        if (res == null || res.Trail != null && res.Trail.Count > itemInDb.Trails.Count)
                         {
                             Console.WriteLine($"Found {res.Trail.Count - itemInDb.Trails.Count} new trails");
 
-                            itemInDb.Trails.AddRange(Json.Flight.ParseTrails(res.Trail.Skip(itemInDb.Trails.Count).ToList()));
-
+                            itemInDb.Trails.AddRange(res.Trail
+                                .Skip(itemInDb.Trails.Count)
+                                .ToList()
+                                .ConvertAll(t => t.Convert()));
                         }
                         else
                         {
@@ -124,7 +123,6 @@ namespace FlightHistoryScraper
                         }
 
                         db.SaveChanges();
-
                         if (itemInDb.ScanCompleted.Value)
                         {
                             Console.WriteLine($"Scanner for flight {flightId} has been cancelled");
@@ -152,7 +150,9 @@ namespace FlightHistoryScraper
 
             var pairs = (Dictionary<string, CancellationTokenSource>)o;
             var createScannersList = new List<string>();
-            var areaData = GetRadarArea();
+            var webRequester = WebRequester.Instance;
+
+            var areaData = await webRequester.GetRadarArea();
 
             if (!string.IsNullOrEmpty(areaData))
             {
@@ -169,9 +169,7 @@ namespace FlightHistoryScraper
                         if (itemInDb == null)
                         {
                             Console.WriteLine("Flight is new!");
-
-                            db.Flights.Add(Json.Flight.ToModel(GetFlight(flightIds[i])));
-                            await Task.Delay(rateDelay);
+                            db.Flights.Add((await GetFlight(flightIds[i])).Convert());
                             createScannersList.Add(flightIds[i]);
                             db.SaveChanges();
                         }
@@ -197,8 +195,6 @@ namespace FlightHistoryScraper
                         pairs.Add(item, CreateFlightScanner(item));
                     }
 
-
-                    await Task.Delay(rateDelay);
                 }
             }
             else
@@ -212,29 +208,13 @@ namespace FlightHistoryScraper
 
 
 
-        private static string GetRadarArea(string bounds = "78.618%2C39.928%2C-121.739%2C-37.101")
+
+
+        private static async Task<Json.Flight> GetFlight(string id)
         {
-            string result = string.Empty;
 
-            try
-            {
-                using HttpClient client = new HttpClient();
-                using HttpResponseMessage response = client.GetAsync($"{radarAreaUrl}&bounds={bounds}").Result;
-                using HttpContent content = response.Content;
-                result = content.ReadAsStringAsync().Result;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-
-            return result;
-        }
-
-        private static Json.Flight GetFlight(string id)
-        {
-            var data = GetFlightData(id);
+            var webRequester = WebRequester.Instance;
+            var data = await webRequester.GetFlightData(id);
 
             var result = Json.Flight.FromJson(data);
 
@@ -247,27 +227,7 @@ namespace FlightHistoryScraper
             return result;
         }
 
-        private static string GetFlightData(string id)
-        {
-            string result = string.Empty;
 
-            try
-            {
-                using HttpClient client = new HttpClient();
-                using HttpResponseMessage response = client.GetAsync($"{flightUrl}&flight={id}").Result;
-                using HttpContent content = response.Content;
-                result = content.ReadAsStringAsync().Result;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-
-            return result;
-
-
-        }
 
         private static List<string> GetFlightIds(string jsonRadarArea)
         {

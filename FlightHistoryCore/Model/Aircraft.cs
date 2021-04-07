@@ -7,14 +7,7 @@
         public string ModelText { get; set; }
         public long? CountryId { get; set; }
         public string Registration { get; set; }
-        public string Hex { get; set; }
-        public string Age { get; set; }
-        public string Msn { get; set; }
+
     }
-
-
-
-
-
 
 }
