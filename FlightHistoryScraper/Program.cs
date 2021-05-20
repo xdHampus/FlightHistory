@@ -45,9 +45,13 @@ namespace FlightHistoryScraper
 
             bool doNotReadKeys = args.Length <= 0;
 
+            if (doNotReadKeys)
+            {
+
+
             while (true)
             {
-                if (doNotReadKeys && Console.ReadKey().Key != ConsoleKey.Escape)
+                if (Console.ReadKey().Key != ConsoleKey.Escape)
                 {
 
                     var nextScan = Math.Floor((DateTime.Now - startTime).TotalSeconds % new TimeSpan(areaScanDelayHours,
@@ -65,7 +69,11 @@ namespace FlightHistoryScraper
                     
                 }
             }
-
+            }
+            else
+            {
+                while(true) { }
+            }
         }
 
         private static CancellationTokenSource CreateFlightScanner(string flightId)
