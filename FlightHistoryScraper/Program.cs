@@ -43,7 +43,7 @@ namespace FlightHistoryScraper
                                        new TimeSpan(0, 0, 0),
                                        new TimeSpan(areaScanDelayHours, areaScanDelayMinutes, areaScanDelaySeconds));
 
-            bool doNotReadKeys = args.Length > 0;
+            bool doNotReadKeys = args.Length <= 0;
 
             while (true)
             {
