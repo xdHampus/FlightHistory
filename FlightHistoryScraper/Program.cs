@@ -12,8 +12,6 @@ namespace FlightHistoryScraper
 {
     class Program
     {
-
-  
         private const int areaScanDelayHours = 0;
         private const int areaScanDelayMinutes = 30;
         private const int areaScanDelaySeconds = 0;
@@ -33,6 +31,8 @@ namespace FlightHistoryScraper
         {
             Console.WriteLine("Hello World!");
 
+           
+
             Dictionary<string, CancellationTokenSource> pairs = new Dictionary<string, CancellationTokenSource>();
 
 
@@ -42,11 +42,12 @@ namespace FlightHistoryScraper
                                        pairs,
                                        new TimeSpan(0, 0, 0),
                                        new TimeSpan(areaScanDelayHours, areaScanDelayMinutes, areaScanDelaySeconds));
-            
+
+            bool doNotReadKeys = args.Length > 0;
 
             while (true)
             {
-                if (Console.ReadKey().Key != ConsoleKey.Escape)
+                if (doNotReadKeys && Console.ReadKey().Key != ConsoleKey.Escape)
                 {
 
                     var nextScan = Math.Floor((DateTime.Now - startTime).TotalSeconds % new TimeSpan(areaScanDelayHours,
