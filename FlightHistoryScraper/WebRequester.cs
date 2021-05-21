@@ -45,7 +45,7 @@ namespace FlightHistoryScraper
                   timeToWait = rateDelay;
                 }
               
-                await Task.Delay(rateDelay - ms);
+                await Task.Delay(timeToWait);
             }
 
         }
