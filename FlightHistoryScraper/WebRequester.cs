@@ -40,6 +40,11 @@ namespace FlightHistoryScraper
 
             if (ms > 0 && ms < rateDelay)
             {
+                int timeToWait = rateDelay - ms;
+                if(timeToWait > rateDelay) {
+                  timeToWait = rateDelay;
+                }
+              
                 await Task.Delay(rateDelay - ms);
             }
 
