@@ -24,8 +24,7 @@ namespace FlightHistoryScraper
         private const int flightcanDelayMinutes = 15;
         private const int flightScanDelaySeconds = 0;
 
-
-
+       
 
         static async Task Main(string[] args)
         {
@@ -38,10 +37,14 @@ namespace FlightHistoryScraper
 
 
             var startTime = DateTime.Now;
+            
+			/*
             Timer areaScan = new Timer(AreaScanCallback,
                                        pairs,
                                        new TimeSpan(0, 0, 0),
                                        new TimeSpan(areaScanDelayHours, areaScanDelayMinutes, areaScanDelaySeconds));
+            */
+            AreaScanCallback(pairs);
 
             bool doNotReadKeys = args.Length <= 0;
 
@@ -96,7 +99,7 @@ namespace FlightHistoryScraper
             {
                 var flightId = (string)((object[])objectArray)[0];
                 var tokenSource = (CancellationTokenSource)((object[])objectArray)[1];
-
+				
                 if (tokenSource.Token.IsCancellationRequested)
                 {
                     Console.WriteLine($"Called cancelled scanner for flight {flightId}");
@@ -108,14 +111,16 @@ namespace FlightHistoryScraper
 
                 using (var db = new FlightDbContext())
                 {
+                	Console.WriteLine("Getting db con...");
                     db.Database.EnsureCreated();
-
+					Console.WriteLine(" Db con received...");
                     var itemInDb = db.Flights.Include("Trails").Where(fx => fx.Identification.FlightIdentifier == flightId).FirstOrDefault();
-
+					Console.WriteLine(" Fetched db content...");
                     if (itemInDb != null)
                     {
+                    	Console.WriteLine("Fetching flight");
                         var res = await GetFlight(flightId);
-
+						Console.WriteLine("Flight fetched");
                         if (res == null || res.Trail != null && res.Trail.Count > itemInDb.Trails.Count)
                         {
                             Console.WriteLine($"Found {res.Trail.Count - itemInDb.Trails.Count} new trails");
@@ -127,10 +132,10 @@ namespace FlightHistoryScraper
                         }
                         else
                         {
-                            itemInDb.ScanCompleted = true;
                             Console.WriteLine("Did not find any new trails");
+                            itemInDb.ScanCompleted = true;
                         }
-
+						Console.WriteLine("Saving changes");
                         db.SaveChanges();
                         if (itemInDb.ScanCompleted.Value)
                         {
@@ -138,14 +143,18 @@ namespace FlightHistoryScraper
                             tokenSource.Cancel();
                         }
                        
+                    } else {
+                    	Console.WriteLine("-- item in db is null");
+                    	tokenSource.Cancel();
                     }
                 }
             }
             catch (Exception e)
             {
+            	Console.WriteLine("  FAILURE");
                 Console.WriteLine(e.Message);
             }
-
+			Console.WriteLine(" Flight scanned properly");
 
             await Task.Delay(new TimeSpan(flightScanDelayHours, flightcanDelayMinutes, flightScanDelaySeconds)); 
             FlightScanCallBack(objectArray);
@@ -156,6 +165,7 @@ namespace FlightHistoryScraper
         private async static void AreaScanCallback(Object o)
         {
             Console.WriteLine("Running area scan: " + DateTime.Now);
+            
 
             var pairs = (Dictionary<string, CancellationTokenSource>)o;
             var createScannersList = new List<string>();
@@ -163,28 +173,46 @@ namespace FlightHistoryScraper
 
             var areaData = await webRequester.GetRadarArea();
 
+            try {
+            	
             if (!string.IsNullOrEmpty(areaData))
             {
                 var flightIds = GetFlightIds(areaData);
                 for (int i = 0; i < flightIds.Count; i++)
                 {
                     Console.WriteLine($"Area scan of flight {flightIds[i]} - {i} out of {flightIds.Count - 1}");
+					if(pairs.ContainsKey(flightIds[i])){
+						Console.WriteLine("Flight already in scanner, not scanning.");
+						continue;
+					}
+                    
                     using (var db = new FlightDbContext())
                     {
                         db.Database.EnsureCreated();
 
-                        var itemInDb = db.FlightIdentifications.Where(fId => fId.FlightIdentifier.Equals(flightIds[i])).FirstOrDefault();
+                        var itemInDb = db.FlightIdentifications
+                        		.Where(fId => fId.FlightIdentifier.Equals(flightIds[i]))
+                        		.FirstOrDefault();
 
                         if (itemInDb == null)
                         {
                             Console.WriteLine("Flight is new!");
-                            db.Flights.Add((await GetFlight(flightIds[i])).Convert());
-                            createScannersList.Add(flightIds[i]);
-                            db.SaveChanges();
+                            var newFlight = await GetFlight(flightIds[i]);
+                            if(newFlight != null) {
+                            	db.Flights.Add(newFlight.Convert());
+                            	createScannersList.Add(flightIds[i]);
+                            	db.SaveChanges();
+                            } else {
+                            	Console.WriteLine("		Catastrophic failure getting flight");
+                            }                     
+
                         }
                         else
                         {
-                            if (!db.Flights.Where(fx => fx.Identification.Id == itemInDb.Id).FirstOrDefault().ScanCompleted.Value && !pairs.ContainsKey(flightIds[i]))
+                            if (!db.Flights
+                            	.Where(fx => fx.Identification.Id == itemInDb.Id)
+                            	.FirstOrDefault()
+                            	.ScanCompleted.Value && !pairs.ContainsKey(flightIds[i]))
                             {
                                 createScannersList.Add(flightIds[i]);
                             }
@@ -210,8 +238,15 @@ namespace FlightHistoryScraper
             {
                 Console.WriteLine("No area data found");
             }
-
-
+            } catch (Exception e){
+            	Console.WriteLine("AREA exception");
+            	Console.WriteLine(e.Message);
+            }
+            Console.WriteLine("DELAY");
+            await Task.Delay(new TimeSpan(areaScanDelayHours, areaScanDelayMinutes, areaScanDelaySeconds)); 
+            Console.WriteLine("DELAY END");
+            AreaScanCallback(o);
+			
 
         }
 
@@ -220,12 +255,14 @@ namespace FlightHistoryScraper
 
 
         private static async Task<Json.Flight> GetFlight(string id)
-        {
-
+        {	
+			Console.WriteLine(" Getting WR instance");
             var webRequester = WebRequester.Instance;
+            Console.WriteLine(" Getting flight data async");
             var data = await webRequester.GetFlightData(id);
-
+            Console.WriteLine(" Getting parsing flight data");
             var result = Json.Flight.FromJson(data);
+			Console.WriteLine("Returning");
 
             if(result == null || result.Trail == null)
             {
@@ -245,7 +282,7 @@ namespace FlightHistoryScraper
             foreach (var item in Json.RadarArea.FromJson(jsonRadarArea).ToList())
             {
 
-                if (item.Value.AnythingArray != null && item.Value.AnythingArray.Count == 19)
+                if (item.Value.AnythingArray != null && item.Value.AnythingArray.Count == 19) //why is this 19?
                 {
                     result.Add(item.Key);
                 }
