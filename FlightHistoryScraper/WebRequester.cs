@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -10,93 +11,98 @@ namespace FlightHistoryScraper
   
     public sealed class WebRequester
     {
+
+        private const int baseRateDelay = 250;
+        private const int rateDelayIncrementer = 2;
+        private const int maxDelayIncrements = 16;
+
+        private HttpClient client = new();
+        private DateTime lastQuery = DateTime.Now;
+        private int currentDelayIncrement = rateDelayIncrementer;
+
+
         private static readonly Lazy<WebRequester>
             lazy =
             new Lazy<WebRequester>
                 (() => new WebRequester());
 
-              private const int rateDelay = 3000;
-        private const string radarAreaUrl = "https://data-live.flightradar24.com/zones/fcgi/feed.js?faa=1&satellite=1&mlat=1&flarm=1&adsb=1&gnd=1&air=1&vehicles=1&estimated=1&maxage=14400&gliders=1&stats=1";
-        private const string flightUrl = "https://data-live.flightradar24.com/clickhandler/?version=1.5";
 
 
         public static WebRequester Instance { get { return lazy.Value; } }
-
+	
         private WebRequester()
         {
         }
 
-        private DateTime lastQuery = DateTime.Now;
+
+        public async Task<string> GetHTMLAsync(string url)
+        {
+            string result = string.Empty;
+            await RateLimit();
+
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync(url);
+				if(response.IsSuccessStatusCode){
+					result = await response.Content.ReadAsStringAsync();
+                    resetDelay();
+                }
+                else
+                {
+                    increaseDelay();
+                    Console.WriteLine($"Unable to get HTML, setting delay to {currentDelayMs()}ms."); ;
+                    return GetHTMLAsync(url).Result;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            lastQuery = DateTime.Now;
+            return result;
+        }
+
+
+
+
 
         private async Task RateLimit()
         {
 
-            TimeSpan span = DateTime.Now - lastQuery;
-            int ms = (int)span.TotalMilliseconds;
+            int ms = (int)(DateTime.Now - lastQuery).TotalMilliseconds;
+            int currentDelay = currentDelayMs();
 
-            Console.WriteLine(ms);
-
-            lastQuery = DateTime.Now;
-
-            if (ms > 0 && ms < rateDelay)
+            if (ms < currentDelay && ms > 0)
             {
-                int timeToWait = rateDelay - ms;
-                if(timeToWait > rateDelay) {
-                  timeToWait = rateDelay;
-                }
-              
-                await Task.Delay(timeToWait);
+                await Task.Delay(currentDelay - ms);
             }
-
         }
 
-        public async Task<string> GetRadarArea(string bounds = "78.618%2C39.928%2C-121.739%2C-37.101")
+
+        private int currentDelayMs()
         {
-            string result = string.Empty;
-
-            await RateLimit();
-
-            try
-            {
-                using HttpClient client = new HttpClient();
-                using HttpResponseMessage response = client.GetAsync($"{radarAreaUrl}&bounds={bounds}").Result;
-                using HttpContent content = response.Content;
-                result = content.ReadAsStringAsync().Result;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-
-            return result;
+            return baseRateDelay * currentDelayIncrement;
         }
 
-        public async Task<string> GetFlightData(string id)
+        private void increaseDelay()
         {
-            string result = string.Empty;
-
-            await RateLimit();
-
-
-            try
+            if (rateDelayIncrementer + currentDelayIncrement < maxDelayIncrements)
             {
-                using HttpClient client = new HttpClient();
-                using HttpResponseMessage response = client.GetAsync($"{flightUrl}&flight={id}").Result;
-                using HttpContent content = response.Content;
-                result = content.ReadAsStringAsync().Result;
+                currentDelayIncrement += rateDelayIncrementer;
             }
-            catch (Exception e)
+        }
+        private void decreaseDelay()
+        {
+            if (currentDelayIncrement - rateDelayIncrementer > rateDelayIncrementer)
             {
-                Console.WriteLine(e.Message);
+                currentDelayIncrement -= rateDelayIncrementer;
             }
-
-
-            return result;
-
-
+        }
+        private void resetDelay()
+        {
+            currentDelayIncrement = rateDelayIncrementer;
         }
 
     }
-
 }
