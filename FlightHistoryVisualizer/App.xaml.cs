@@ -17,6 +17,8 @@ namespace FlightHistoryVisualizer
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.ApiKey = "";
+
         }
 
     }
