@@ -95,6 +95,7 @@ namespace FlightHistoryCore.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Text = table.Column<bool>(type: "TEXT", nullable: true),
                     Live = table.Column<bool>(type: "INTEGER", nullable: true),
                     EstimateId = table.Column<int>(type: "INTEGER", nullable: true)
                 },

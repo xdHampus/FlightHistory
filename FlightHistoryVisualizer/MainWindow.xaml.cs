@@ -13,6 +13,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+
+using Esri.ArcGISRuntime.Geometry;
+using Esri.ArcGISRuntime.Mapping;
+
+
+
 namespace FlightHistoryVisualizer
 {
     /// <summary>
@@ -23,30 +29,11 @@ namespace FlightHistoryVisualizer
         public MainWindow()
         {
             InitializeComponent();
-
-
-        }
-
-
-
-        private void MapsWebView_WebMessageReceived(object sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
-        {
-
-            var kek = MapsWebView;
-        }
-
-
-        private void MapsWebView_SourceUpdated(object sender, DataTransferEventArgs e)
-        {
-            var kek = MapsWebView;
+            MapPoint mapCenterPoint = new MapPoint(-118.805, 34.027, SpatialReferences.Wgs84);
+            MainMapView.SetViewpoint(new Viewpoint(mapCenterPoint, 100000));
 
         }
 
-        private void MapsWebView_SourceChanged(object sender, Microsoft.Web.WebView2.Core.CoreWebView2SourceChangedEventArgs e)
-        {
 
-            LabelCoordinates.Content = MapsWebView.Source.AbsolutePath;
-
-        }
     }
 }

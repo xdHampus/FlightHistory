@@ -5,6 +5,7 @@ namespace FlightHistoryCore
 {
     public class FlightDbContext : DbContext
     {
+
         public DbSet<Flight> Flights { get; set; }
         public DbSet<Aircraft> Aircraft { get; set; }
         public DbSet<Airline> Airlines { get; set; }
@@ -18,7 +19,8 @@ namespace FlightHistoryCore
         public DbSet<Trail> Trails { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite("Data Source=flightradar.db");
+            => options
+            .UseSqlite("Data Source=flightradar.db");
 
 
 

@@ -585,6 +585,7 @@ namespace FlightHistoryScraper.Json
 
             return new DbModel.FlightStatus()
             {
+                Text = this.Text,
                 Live = this.Live,
                 Estimate = estimate
             };

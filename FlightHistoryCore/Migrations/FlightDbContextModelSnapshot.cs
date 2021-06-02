@@ -192,6 +192,9 @@ namespace FlightHistoryCore.Migrations
                     b.Property<int?>("EstimateId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool?>("Text")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool?>("Live")
                         .HasColumnType("INTEGER");
 

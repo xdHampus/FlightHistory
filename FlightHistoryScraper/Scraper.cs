@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FlightHistoryCore;
 using FlightHistoryCore.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlightHistoryScraper
 {
@@ -13,10 +14,11 @@ namespace FlightHistoryScraper
         private const string radarAreaAPIUrl = "https://data-live.flightradar24.com/zones/fcgi/feed.js?faa=1&satellite=1&mlat=1&flarm=1&adsb=1&gnd=1&air=1&vehicles=1&estimated=1&maxage=14400&gliders=1&stats=1";
         private const string flightUrl = "https://data-live.flightradar24.com/clickhandler/?version=1.5";
         private const string bounds = "78.618%2C39.928%2C-121.739%2C-37.101";
+        private const int maxRescanFlightAttempts = 5;
 
         private string radarAreaUrl = $"{radarAreaAPIUrl}&bounds={bounds}";
-        private ScanQueue scanTargets = new();
-
+        //private ScanQueue scanTargets = new();
+        private Queue<string> scanTargets = new();
 
         private WebRequester webRequester = WebRequester.Instance;
 
@@ -53,7 +55,7 @@ namespace FlightHistoryScraper
 
         private void AreaScanFlight(string fId)
         {
-            if (!scanTargets.FlightExists(fId))
+            if (!scanTargets.Contains(fId))
             {
                 if (!FlightInDB(fId))
                 {
@@ -63,12 +65,12 @@ namespace FlightHistoryScraper
                 else if (FlightScanIncomplete(fId))
                 {
                     Console.WriteLine("Flight was not scanned properly, queuing again.");
-                    scanTargets.Enqueue(GetJsonFlight(fId).Convert());
+                    scanTargets.Enqueue(fId);
                 }
             }
             else
             {
-                Console.WriteLine("Flight already scanned.");
+                Console.WriteLine("Flight already being scanned.");
             }
         }
 
@@ -105,7 +107,7 @@ namespace FlightHistoryScraper
                 {
                     db.Flights.Add(flight);
                     db.SaveChanges();
-                    scanTargets.Enqueue(flight);
+                    scanTargets.Enqueue(id);
                 } 
                 else
                 {
@@ -118,31 +120,62 @@ namespace FlightHistoryScraper
             }
         }
 
-        private void RescanFlight(Flight flight)
+        private void RescanFlight(string fId, int tries = 1)
         {
             using var db = new FlightDbContext();
-            var res = GetJsonFlight(flight.Identification.FlightIdentifier);
 
+            Flight flight = db.Flights
+                .Where(f => f.Identification.Id == db.FlightIdentifications
+                    .Where(id => id.FlightIdentifier.Equals(fId))
+                    .FirstOrDefault().Id)
+                .Include("Status")
+                .Include("Trails")
+                .FirstOrDefault();
 
-            if (res == null || res.Trail != null && res.Trail.Count > flight.Trails.Count)
+            var res = GetJsonFlight(fId);
+
+            if (res != null && res.Trail != null)
             {
-                Console.WriteLine($"Found {res.Trail.Count - flight.Trails.Count} new trails");
-                flight.Trails.AddRange(res.Trail
-                    .Skip(flight.Trails.Count)
-                    .ToList()
-                    .ConvertAll(t => t.Convert()));
+                if (res.Trail.Count > flight.Trails.Count)
+                {
+                    Console.WriteLine($"Found {res.Trail.Count - flight.Trails.Count} new trails");
+                    flight.Trails.AddRange(res.Trail
+                        .Skip(flight.Trails.Count)
+                        .ToList()
+                        .ConvertAll(t => t.Convert()));
+                }
+
+                if (res.Status != null && !res.Status.Live.GetValueOrDefault())
+                {
+                    Console.WriteLine("Scan completed.");
+                    flight.Status.Text = res.Status.Text;
+                    flight.ScanCompleted = true;
+                }
+                else
+                {
+                    Console.WriteLine("Flight not completed, queuing again.");
+                }
+
+
+                db.SaveChanges();
+                if (!flight.ScanCompleted.Value)
+                {
+                    scanTargets.Enqueue(fId);
+                }
+            }
+            else if(tries < maxRescanFlightAttempts)
+            {
+                tries += 1;
+                Console.WriteLine($"Scan failed, retrying {tries} out of {maxRescanFlightAttempts - 1}.");
+                RescanFlight(fId, tries);
             }
             else
             {
-                Console.WriteLine("Scan completed.");
+                Console.WriteLine($"Scan failed too many attempts, cancelling scan.");
                 flight.ScanCompleted = true;
-            }
-
-
-            db.SaveChanges();
-            if (!flight.ScanCompleted.Value)
-            {
-                scanTargets.Enqueue(flight);
+                flight.Status.Live = true;
+                flight.Status.Text = "Error";
+                db.SaveChanges();
             }
         }
 
@@ -151,9 +184,9 @@ namespace FlightHistoryScraper
             int initSize = scanTargets.Count;
             for (int i = 0; i < initSize; i++)
             {
-                Flight flight = scanTargets.Dequeue();
-                Console.WriteLine($"Recanning flights {flight.Identification.FlightIdentifier} at {CurrentDateTime()} - {i} out of {initSize}.");
-                RescanFlight(flight);
+                string fId = scanTargets.Dequeue();
+                Console.WriteLine($"Recanning flights {fId} at {CurrentDateTime()} - {i} out of {initSize}.");
+                RescanFlight(fId);
             }
         }
 

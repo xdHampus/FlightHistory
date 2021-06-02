@@ -6,7 +6,7 @@
 
         public bool? Live { get; set; }
         public Estimate Estimate { get; set; }
-
+        public string Text { get; set; }
     }
 
 }
