@@ -1,1 +1,0 @@
-nix-shell -p dotnet-sdk_5 dotnet-sdk_3 dotnetCorePackages.net_5_0 sqlite
